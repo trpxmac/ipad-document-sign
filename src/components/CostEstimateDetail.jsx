@@ -1,0 +1,380 @@
+import React, { useState } from 'react';
+import { 
+  ArrowLeft, 
+  PenTool, 
+  CheckCircle2, 
+  Printer, 
+  QrCode,
+  UserCircle2,
+  Check
+} from 'lucide-react';
+import SignatureModal from './SignatureModal';
+
+export default function CostEstimateDetail({ document, onBack, onSaveSignature }) {
+  const [isSignModalOpen, setIsSignModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  
+  // Agreement Checkboxes
+  const [agree1, setAgree1] = useState(false);
+  const [agree2, setAgree2] = useState(false);
+
+  if (!document) return null;
+
+  const isPending = document.status === 'PENDING';
+  const canSign = agree1 && agree2;
+
+  const handleConfirmSignature = async (payload) => {
+    await onSaveSignature(payload);
+    setIsSignModalOpen(false);
+    setToastMessage('บันทึกลายเซ็นดิจิทัลและอัปเดตสถานะสำเร็จ!');
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto pb-16 print:pb-0 print:space-y-0">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="print:hidden fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-2 animate-bounce">
+          <CheckCircle2 className="w-5 h-5" />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Top Action Bar */}
+      <div className="print:hidden bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          กลับไปหน้ารายการเอกสาร
+        </button>
+
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          {isPending ? (
+            <div className="flex items-center gap-3">
+              {!canSign && (
+                <span className="text-xs text-rose-500 font-medium hidden sm:inline-block">
+                  * กรุณาติ๊กยอมรับเงื่อนไขทั้ง 2 ข้อด้านล่างก่อนเซ็นเอกสาร
+                </span>
+              )}
+              <button
+                disabled={!canSign}
+                onClick={() => setIsSignModalOpen(true)}
+                className={`inline-flex items-center px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition cursor-pointer ${
+                  canSign 
+                    ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-blue-600/20' 
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                }`}
+              >
+                <PenTool className="w-4 h-4 mr-2" />
+                เซ็นเอกสารบน iPad (Sign Now)
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <span className="inline-flex items-center px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                <CheckCircle2 className="w-4 h-4 mr-1.5 text-emerald-600" />
+                ลงนามเสร็จสมบูรณ์แล้ว
+              </span>
+              <button
+                onClick={handlePrint}
+                className="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition cursor-pointer"
+              >
+                <Printer className="w-4 h-4 mr-1.5 text-slate-500" />
+                พิมพ์ / พรีวิว PDF
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* PDF-like Formal Document Container (A4 Paper Aesthetic) */}
+      <div className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-none print:min-h-0">
+        
+        {/* Row 1: Header Logos & Patient Info */}
+        <div className="grid grid-cols-12 gap-0 border border-black mb-1 text-[11px] font-sans">
+          {/* Logo Column */}
+          <div className="col-span-3 border-r border-black flex flex-col items-center justify-between p-2">
+            <div className="flex items-center justify-center w-full mb-1">
+              <img 
+                src="/siriroj-logo.svg" 
+                alt="Bangkok Hospital Siriroj" 
+                className="w-[160px] h-auto object-contain print:grayscale" 
+              />
+            </div>
+            <div className="border border-black w-full text-center py-0.5 bg-white mx-1 mt-auto">
+              <div className="font-bold text-[10px] leading-tight">แบบฟอร์มประเมินค่ารักษาพยาบาล</div>
+              <div className="text-[9px] leading-tight">Medical Treatment Cost Estimate Form</div>
+            </div>
+          </div>
+          
+          {/* Photo Column */}
+          <div className="col-span-2 border-r border-black bg-gray-200 flex items-center justify-center overflow-hidden h-[110px]">
+            {document.patientPhoto ? (
+               <img src={document.patientPhoto} alt="Patient" className="w-full h-full object-cover" />
+            ) : (
+               <UserCircle2 className="w-16 h-16 text-gray-400" />
+            )}
+          </div>
+
+          {/* Patient Details Column */}
+          <div className="col-span-5 border-r border-black p-2 flex flex-col justify-center leading-[1.1]">
+            <div className="flex items-end mb-1">
+              <span className="font-semibold shrink-0 mr-1">Patient Name :</span>
+              <span className="font-bold flex-grow border-b border-dotted border-black">{document.patientName}</span>
+            </div>
+            <div className="flex items-end mb-1">
+              <span className="font-semibold shrink-0 mr-1">Date of birth (DD/MM/YYYY) :</span>
+              <span className="flex-grow border-b border-dotted border-black">{document.patientDOB}</span>
+            </div>
+            <div className="flex items-end mb-1">
+              <span className="font-semibold shrink-0 mr-1">Age :</span>
+              <span className="flex-grow border-b border-dotted border-black">{document.patientAgeDetail}</span>
+            </div>
+            <div className="flex items-end mb-1">
+              <span className="font-semibold shrink-0 mr-1">HN :</span>
+              <span className="w-24 border-b border-dotted border-black mr-2">{document.hn}</span>
+              <span className="font-semibold shrink-0 mr-1">VN/AN :</span>
+              <span className="flex-grow border-b border-dotted border-black">{document.vn}</span>
+            </div>
+            <div className="flex items-end mb-1">
+              <span className="font-semibold shrink-0 mr-1">Visit/Admit Date:</span>
+              <span className="w-20 border-b border-dotted border-black mr-2">{document.orDate}</span>
+              <span className="font-semibold shrink-0 mr-1">Gender :</span>
+              <span className="flex-grow border-b border-dotted border-black">{document.patientGender}</span>
+            </div>
+            <div className="flex items-end">
+              <span className="font-semibold shrink-0 mr-1">Allergies:</span>
+              <span className="font-bold flex-grow border-b border-dotted border-black">{document.allergies}</span>
+            </div>
+          </div>
+
+          {/* QR Code Column */}
+          <div className="col-span-2 p-2 flex flex-col items-center justify-center">
+            <QrCode className="w-16 h-16 text-black mb-1" />
+          </div>
+        </div>
+
+        {/* Row 2: Medical Details */}
+        <div className="grid grid-cols-12 gap-0 border border-black border-t-0 mb-4 text-[11px] bg-gray-50/50">
+          <div className="col-span-3 p-1.5 border-r border-black flex flex-col justify-between">
+            <div>
+              <span className="font-semibold block">เลขที่อ้างอิง การตรวจสอบสิทธิ์ /</span>
+              <span className="text-[10px] block">Pre-Authorize-Ref.:</span>
+            </div>
+            <div>{document.preAuthorizeRef}</div>
+          </div>
+          <div className="col-span-6 p-1.5 border-r border-black flex flex-col justify-between relative">
+            <div className="flex mb-1">
+              <span className="w-24 font-semibold shrink-0 block">วินิจฉัยโรค/Diagnosis :</span>
+              <span className="border-b border-dotted border-gray-400 flex-grow">{document.diagnosis}</span>
+            </div>
+            <div className="flex mb-3">
+              <span className="w-24 font-semibold shrink-0 block">หัตถการ/Procedure :</span>
+              <span className="border-b border-dotted border-gray-400 flex-grow">{document.procedure}</span>
+            </div>
+            <div className="flex gap-6 absolute bottom-1.5 left-1.5">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <div className={`w-3 h-3 border border-black flex items-center justify-center ${document.admitType === 'Admit' ? 'bg-black text-white' : 'bg-white'}`}>
+                  {document.admitType === 'Admit' && <Check className="w-2.5 h-2.5" strokeWidth={4} />}
+                </div>
+                <span>Admit</span>
+              </label>
+              <div className="flex gap-1">
+                <span>LOS:</span>
+                <span className="border-b border-dotted border-gray-400 w-16">{document.los}</span>
+              </div>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <div className={`w-3 h-3 border border-black flex items-center justify-center ${document.admitType === 'Day Case' ? 'bg-black text-white' : 'bg-white'}`}>
+                  {document.admitType === 'Day Case' && <Check className="w-2.5 h-2.5" strokeWidth={4} />}
+                </div>
+                <span>Day Case</span>
+              </label>
+            </div>
+          </div>
+          <div className="col-span-3 p-1.5 flex flex-col justify-between">
+            <div className="mb-2">
+              <span className="font-semibold block">ชนิดของการดมยา/Anesthesia :</span>
+              <span>{document.anesthesia}</span>
+            </div>
+            <div>
+              <span className="font-semibold">วันที่ผ่าตัด/OR date : </span>
+              <span>{document.orDate}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Cost Breakdown Table */}
+        <table className="w-full border-collapse border border-black text-[12px] mb-4">
+          <thead className="bg-gray-200 font-semibold">
+            <tr>
+              <th className="border border-black p-1.5 text-left w-20">SIM B</th>
+              <th className="border border-black p-1.5 text-left">รายละเอียดค่ารักษาพยาบาล/Medical Cost Details</th>
+              <th className="border border-black p-1.5 text-right w-40">จำนวนเงิน (บาท)/Amount (Baht)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {document.costItems.map((item, index) => (
+              <tr key={index}>
+                <td className="border border-black p-1.5">{item.simCode}</td>
+                <td className="border border-black p-1.5">{item.description}</td>
+                <td className="border border-black p-1.5 text-right">
+                  {item.amount.toLocaleString(undefined, { minimumFractionDigits: 0 })}
+                </td>
+              </tr>
+            ))}
+            <tr className="bg-gray-100 font-bold text-[13px]">
+              <td className="border border-black p-2" colSpan={2}>รวมค่าใช้จ่ายทั้งสิ้น/Total</td>
+              <td className="border border-black p-2 text-right">
+                {document.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 0 })}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Row 4: Note & Agreements */}
+        <div className="mb-4 text-[11px] leading-tight space-y-1">
+          <div className="flex items-end">
+            <span className="font-bold w-10">Note:</span>
+            <span className="border-b border-dotted border-black flex-grow block h-4"></span>
+          </div>
+          <div className="border-b border-dotted border-black w-full h-4"></div>
+        </div>
+          
+        <div className="border border-black p-1.5 font-bold mb-2 text-[11px] bg-gray-100/50">
+          โปรดชำระเงินมัดจำ {document.depositPercent}% ของราคาประเมินก่อนเข้ารับบริการ / A Deposit of {document.depositPercent}% is required before surgery =
+        </div>
+
+          <div className="space-y-3 px-2">
+            <label className="flex items-start gap-2 cursor-pointer group">
+              <div className={`mt-0.5 w-4 h-4 shrink-0 border-2 rounded-sm flex items-center justify-center transition-colors ${
+                  agree1 ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-400'
+                } ${!isPending && 'opacity-50 pointer-events-none'}`}
+              >
+                {agree1 && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
+                <input 
+                  type="checkbox" 
+                  className="sr-only" 
+                  checked={agree1} 
+                  onChange={(e) => isPending && setAgree1(e.target.checked)}
+                />
+              </div>
+              <span className="text-gray-800">{document.agreementText1}</span>
+            </label>
+
+            <label className="flex items-start gap-2 cursor-pointer group">
+              <div className={`mt-0.5 w-4 h-4 shrink-0 border-2 rounded-sm flex items-center justify-center transition-colors ${
+                  agree2 ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-400'
+                } ${!isPending && 'opacity-50 pointer-events-none'}`}
+              >
+                {agree2 && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
+                <input 
+                  type="checkbox" 
+                  className="sr-only" 
+                  checked={agree2} 
+                  onChange={(e) => isPending && setAgree2(e.target.checked)}
+                />
+              </div>
+              <div className="text-gray-800">
+                {document.agreementText2.split('\n').map((line, i) => (
+                  <p key={i} className="mb-1 last:mb-0">{line}</p>
+                ))}
+              </div>
+            </label>
+          </div>
+
+        {/* Row 5: Exclusions */}
+        <div className="mb-4 text-[11px] leading-relaxed">
+          <div className="font-bold text-[12px] mb-1">การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</div>
+          <div className="text-gray-700">{document.exclusions}</div>
+        </div>
+
+        {/* Row 6: Signatures */}
+        <div className="grid grid-cols-3 gap-8 text-[11px] mt-12 mb-2 px-4">
+          
+          {/* Patient Signature Slot (iPad Interactive) */}
+          <div className="flex flex-col items-center">
+            <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
+              {isPending ? (
+                <div 
+                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${
+                    canSign 
+                      ? 'border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60' 
+                      : 'border-gray-300 bg-gray-50 opacity-60 cursor-not-allowed'
+                  }`}
+                  onClick={() => canSign && setIsSignModalOpen(true)}
+                >
+                  <PenTool className={`w-5 h-5 mb-1 ${canSign ? 'text-blue-500 animate-bounce' : 'text-gray-400'}`} />
+                  <span className={`font-bold text-[10px] ${canSign ? 'text-blue-700' : 'text-gray-500'}`}>
+                    {canSign ? 'แตะที่นี่เพื่อลงลายมือชื่อ' : 'ติ๊กยอมรับเงื่อนไขก่อนเซ็น'}
+                  </span>
+                </div>
+              ) : (
+                <div className="absolute bottom-1 w-full flex items-center justify-center">
+                  <img 
+                    src={document.signature?.signatureDataUrl} 
+                    alt="Signature" 
+                    className="max-h-12 object-contain"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="text-center w-full text-[10px]">
+              (ผู้ป่วย, ญาติ / Patient or Representative)
+            </div>
+            {!isPending && document.signature && (
+               <div className="text-[9px] text-gray-500 mt-1">
+                 {document.signature.signedAt}
+               </div>
+            )}
+          </div>
+
+          {/* Hospital Estimator Slot */}
+          <div className="flex flex-col items-center">
+            <div className="w-full border-b border-dotted border-black h-10 mb-2">
+            </div>
+            <div className="text-center w-full text-[10px]">
+              (เจ้าหน้าที่ประเมินค่าใช้จ่าย / Hospital Estimator)
+            </div>
+          </div>
+
+          {/* International Coordinator Slot */}
+          <div className="flex flex-col items-center">
+            <div className="w-full border-b border-dotted border-black h-10 mb-2">
+            </div>
+            <div className="text-center w-full text-[10px]">
+              (ผู้ประสานงาน / International Coordinator)
+            </div>
+          </div>
+
+        </div>
+
+        {/* Row 7: Footer */}
+        <div className="flex justify-between items-end text-[9px] mt-4 text-gray-600">
+          <div>
+            <span className="font-bold">***หมายเหตุ เอกสารนี้มีระยะเวลา {document.validDays} วัน นับจากวันที่ทำการประเมินราคา</span>
+            <span> Remark: This document is valid {document.validDays} days after agreement to this estimate.</span>
+          </div>
+        </div>
+        <div className="flex justify-between items-end text-[9px] mt-2 text-gray-600">
+          <div>1/1</div>
+          <div>{document.formCode}</div>
+        </div>
+        
+      </div>
+
+      {/* Signature Modal */}
+      <SignatureModal
+        document={document}
+        isOpen={isSignModalOpen}
+        onClose={() => setIsSignModalOpen(false)}
+        onConfirmSignature={handleConfirmSignature}
+      />
+    </div>
+  );
+}
