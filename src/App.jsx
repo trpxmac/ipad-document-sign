@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import DocumentList from './components/DocumentList';
 import DocumentDetail from './components/DocumentDetail';
 import CostEstimateDetail from './components/CostEstimateDetail';
+import PdfDocumentViewer from './components/PdfDocumentViewer';
 import { 
   fetchDocumentList, 
   fetchDocumentById, 
@@ -110,6 +111,12 @@ export default function App() {
         {selectedDocId && selectedDoc ? (
           selectedDoc.documentCategory === 'COST_ESTIMATE' ? (
             <CostEstimateDetail
+              document={selectedDoc}
+              onBack={handleBackToList}
+              onSaveSignature={handleSaveSignature}
+            />
+          ) : selectedDoc.documentCategory === 'PDF_DOCUMENT' ? (
+            <PdfDocumentViewer
               document={selectedDoc}
               onBack={handleBackToList}
               onSaveSignature={handleSaveSignature}

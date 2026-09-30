@@ -59,5 +59,34 @@ export const INITIAL_MOCK_DOCUMENTS = [
     coordinatorSignature: null,
     
     validDays: 30
+  },
+  {
+    id: "DOC-2026-PDF-001",
+    hn: "67-26-099123",
+    vn: "067-26-999888",
+    patientName: "MS. JANE DOE",
+    patientAge: 28,
+    patientGender: "Female",
+    idCard: "Thai ID: 1234567890123",
+    rights: "ประกันสังคม",
+    department: "แผนกอายุรกรรม (Medicine Clinic)",
+    room: "OPD",
+    attendingPhysician: "พญ. ใจดี รักษาเก่ง",
+    
+    patientDOB: "01 ม.ค. 2541",
+    patientAgeDetail: "28 Y 0 M 0 D",
+    allergies: "Penicillin",
+    patientPhoto: null, 
+    
+    documentType: "หนังสือให้ความยินยอม (Consent Form)",
+    documentCategory: "PDF_DOCUMENT",
+    createdDate: "2026-09-30 11:15",
+    status: "PENDING",
+    urgency: "NORMAL",
+    summary: "Consent for general treatment",
+    
+    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    
+    signature: null
   }
 ];
