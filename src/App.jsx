@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import DocumentList from './components/DocumentList';
 import DocumentDetail from './components/DocumentDetail';
 import CostEstimateDetail from './components/CostEstimateDetail';
-import PdfDocumentViewer from './components/PdfDocumentViewer';
 import { 
   fetchDocumentList, 
   fetchDocumentById, 
@@ -81,7 +80,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 print:bg-white flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-100 print:bg-white print:min-h-0 print:block flex flex-col font-sans">
       {/* Top Navigation */}
       <Navbar onResetData={handleResetData} />
 
@@ -101,7 +100,7 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print:p-0 print:m-0">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm">
             {error}
@@ -111,12 +110,6 @@ export default function App() {
         {selectedDocId && selectedDoc ? (
           selectedDoc.documentCategory === 'COST_ESTIMATE' ? (
             <CostEstimateDetail
-              document={selectedDoc}
-              onBack={handleBackToList}
-              onSaveSignature={handleSaveSignature}
-            />
-          ) : selectedDoc.documentCategory === 'PDF_DOCUMENT' ? (
-            <PdfDocumentViewer
               document={selectedDoc}
               onBack={handleBackToList}
               onSaveSignature={handleSaveSignature}

@@ -43,7 +43,7 @@ html, body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 5mm;
+    margin: 0;
   }
   body {
     background: white !important;

@@ -26,7 +26,7 @@ export const INITIAL_MOCK_DOCUMENTS = [
     preAuthorizeRef: "R26-002190",
     diagnosis: "",
     procedure: "I&D",
-    admitType: "Day Case",
+    admitType: "",
     los: "",
     anesthesia: "Local Anesthesia",
     orDate: "2026-09-30",
@@ -49,44 +49,15 @@ export const INITIAL_MOCK_DOCUMENTS = [
     totalAmount: 6500,
     depositPercent: 80,
     
-    agreementText1: "ข้าพเจ้าทราบดีว่าค่ารักษาพยาบาลนี้เป็นราคาประมาณเท่านั้น ซึ่งค่ารักษาพยาบาลที่เกิดขึ้นจริงอาจมีการเปลี่ยนแปลงได้ขึ้นอยู่กับระยะเวลาที่พักรักษาตัวในโรงพยาบาล และการตรวจเพิ่มเติมอื่นๆ / I understand that this estimated cost is provided as a guide and that the final cost is likely to vary.",
-    agreementText2: "ข้าพเจ้ายินยอมชำระเงินเต็มจำนวนในกรณีที่บริษัทประกันปฏิเสธความคุ้มครองค่ารักษาพยาบาลในครั้งนี้ / I also accept that in the case where my/his/her insurance company refuses coverage, I promise to pay the full expenses upon discharge.",
+    agreementText1: "ข้าพเจ้าทราบดีว่าค่ารักษาพยาบาลนี้เป็นราคาประมาณเท่านั้น ซึ่งค่ารักษาพยาบาลที่เกิดขึ้นจริงอาจมีการเปลี่ยนแปลงได้ขึ้นอยู่กับระยะเวลา\nที่พักรักษาตัวในโรงพยาบาล และการตรวจเพิ่มเติมอื่นๆ / I understand that this estimated cost is provided as a guide and that\nthe final cost is likely to vary depending on the length of stay in hospital\nwhilst receiving treatments and other special investigations\nnot originally estimated.",
+    agreementText2: "ข้าพเจ้ายินยอมชำระเงินเต็มจำนวนในกรณีที่บริษัทประกันปฏิเสธความคุ้มครองค่ารักษาพยาบาลในครั้งนี้ /\nI also accept that in the case where my/his/her insurance company refuses coverage, I promise to pay the full expenses upon\ndischarge.",
     
-    exclusions: "ภาวะแทรกซ้อน / Any Complications, โรคประจำตัว / Underlying Diseases, ปรึกษาแพทย์ด้านอื่นๆ / Consultant Doctor (Other specialty), การผ่าตัดซ้ำ(Re-Operation), การติดตามหลังผ่าตัด (Follow up after operation), การนอนสังเกตอาการในห้องผู้ป่วยหนัก (Observe ICU, CCU, SICU), การให้เลือด / Blood Transfusion, ค่า CT scan, MRI, MRA / Cost of CT scan, MRI, MRA การตรวจวินิจฉัยเพิ่มเติม (Other special investigation)",
+    exclusions: "ภาวะแทรกซ้อน / Any Complications, โรคประจำตัว / Underlying Diseases, ปรึกษาแพทย์ด้านอื่นๆ / Consultant Doctor (Other specialty), \nการผ่าตัดซ้ำ(Re-Operation), การติดตามหลังผ่าตัด (Follow up after operation), การนอนสังเกตอาการในห้องผู้ป่วยหนัก (Observe ICU, CCU, SICU), \nการให้เลือด / Blood Transfusion, ค่า CT scan, MRI, MRA / Cost of CT scan, MRI, MRA การตรวจวินิจฉัยเพิ่มเติม (Other special investigation)",
     
     signature: null,
     estimatorSignature: null,
     coordinatorSignature: null,
     
     validDays: 30
-  },
-  {
-    id: "DOC-2026-PDF-001",
-    hn: "67-26-099123",
-    vn: "067-26-999888",
-    patientName: "MS. JANE DOE",
-    patientAge: 28,
-    patientGender: "Female",
-    idCard: "Thai ID: 1234567890123",
-    rights: "ประกันสังคม",
-    department: "แผนกอายุรกรรม (Medicine Clinic)",
-    room: "OPD",
-    attendingPhysician: "พญ. ใจดี รักษาเก่ง",
-    
-    patientDOB: "01 ม.ค. 2541",
-    patientAgeDetail: "28 Y 0 M 0 D",
-    allergies: "Penicillin",
-    patientPhoto: null, 
-    
-    documentType: "หนังสือให้ความยินยอม (Consent Form)",
-    documentCategory: "PDF_DOCUMENT",
-    createdDate: "2026-09-30 11:15",
-    status: "PENDING",
-    urgency: "NORMAL",
-    summary: "Consent for general treatment",
-    
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    
-    signature: null
   }
 ];

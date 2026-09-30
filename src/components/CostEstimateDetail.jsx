@@ -6,7 +6,9 @@ import {
   Printer, 
   QrCode,
   UserCircle2,
-  Check
+  Check,
+  Square,
+  CheckSquare
 } from 'lucide-react';
 import SignatureModal from './SignatureModal';
 
@@ -35,7 +37,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 print:pb-0 print:space-y-0">
+    <div className="space-y-6 max-w-5xl mx-auto pb-16 print:m-0 print:p-0 print:space-y-0">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="print:hidden fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-2 animate-bounce">
@@ -94,36 +96,36 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       </div>
 
       {/* PDF-like Formal Document Container (A4 Paper Aesthetic) */}
-      <div className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-none print:min-h-0">
+      <div className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] flex flex-col p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:mx-auto print:p-[10mm] print:w-full print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:box-border">
         
         {/* Row 1: Header Logos & Patient Info */}
-        <div className="grid grid-cols-12 gap-0 border border-black mb-1 text-[11px] font-sans">
+        <div className="grid grid-cols-12 gap-2 mb-2 text-[11px] font-sans">
           {/* Logo Column */}
-          <div className="col-span-3 border-r border-black flex flex-col items-center justify-between p-2">
-            <div className="flex items-center justify-center w-full mb-1">
+          <div className="col-span-3 flex flex-col justify-between">
+            <div className="flex items-start justify-center w-full">
               <img 
                 src="/siriroj-logo.svg" 
                 alt="Bangkok Hospital Siriroj" 
-                className="w-[160px] h-auto object-contain print:grayscale" 
+                className="w-[140px] h-auto object-contain print:grayscale" 
               />
             </div>
-            <div className="border border-black w-full text-center py-0.5 bg-white mx-1 mt-auto">
-              <div className="font-bold text-[10px] leading-tight">แบบฟอร์มประเมินค่ารักษาพยาบาล</div>
-              <div className="text-[9px] leading-tight">Medical Treatment Cost Estimate Form</div>
+            <div className="border border-black w-full text-center py-0.5 bg-white">
+              <div className="font-bold text-[9px] leading-tight tracking-tight whitespace-nowrap">แบบฟอร์มประเมินค่ารักษาพยาบาล</div>
+              <div className="text-[7px] leading-tight tracking-tighter whitespace-nowrap">Medical Treatment Cost Estimate Form</div>
             </div>
           </div>
           
           {/* Photo Column */}
-          <div className="col-span-2 border-r border-black bg-gray-200 flex items-center justify-center overflow-hidden h-[95px]">
+          <div className="col-span-2 border border-black bg-gray-200 flex items-center justify-center overflow-hidden">
             {document.patientPhoto ? (
-               <img src={document.patientPhoto} alt="Patient" className="w-full h-full object-cover" />
+               <img src={document.patientPhoto} alt="Patient" className="w-full h-full object-cover grayscale" />
             ) : (
                <UserCircle2 className="w-16 h-16 text-gray-400" />
             )}
           </div>
 
           {/* Patient Details Column */}
-          <div className="col-span-5 border-r border-black p-2 flex flex-col justify-center leading-[1.1]">
+          <div className="col-span-5 border border-black p-1.5 flex flex-col justify-center leading-[1.1]">
             <div className="flex items-end mb-1">
               <span className="font-semibold shrink-0 mr-1">Patient Name :</span>
               <span className="font-bold flex-grow border-b border-dotted border-black">{document.patientName}</span>
@@ -155,46 +157,42 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           </div>
 
           {/* QR Code Column */}
-          <div className="col-span-2 p-2 flex flex-col items-center justify-center">
-            <QrCode className="w-16 h-16 text-black mb-1" />
+          <div className="col-span-2 flex flex-col items-center justify-center">
+            <QrCode className="w-[70px] h-[70px] text-black" />
           </div>
         </div>
 
         {/* Row 2: Medical Details */}
-        <div className="grid grid-cols-12 gap-0 border border-black border-t-0 mb-2 text-[11px] bg-gray-50/50">
-          <div className="col-span-3 p-1.5 border-r border-black flex flex-col justify-between">
+        <div className="grid grid-cols-12 gap-0 border border-black mb-2 text-[11px] bg-gray-50/50">
+          <div className="col-span-3 p-1.5 border-r border-black flex flex-col">
             <div>
-              <span className="font-semibold block">เลขที่อ้างอิง การตรวจสอบสิทธิ์ /</span>
-              <span className="text-[10px] block">Pre-Authorize-Ref.:</span>
+              <span className="font-semibold block">เลขที่อ้างอิง การตรวจสอบสิทธิ์/</span>
+              <span className="text-[10px] block mb-1">Pre-Authorize-Ref.:</span>
             </div>
             <div>{document.preAuthorizeRef}</div>
           </div>
           <div className="col-span-6 p-1.5 border-r border-black flex flex-col justify-between relative">
-            <div className="flex mb-1">
-              <span className="w-24 font-semibold shrink-0 block">วินิจฉัยโรค/Diagnosis :</span>
-              <span className="border-b border-dotted border-gray-400 flex-grow">{document.diagnosis}</span>
+            <div className="mb-1">
+              <span className="font-semibold whitespace-nowrap mr-1">วินิจฉัยโรค/Diagnosis :</span>
+              <span>{document.diagnosis}</span>
             </div>
-            <div className="flex mb-3">
-              <span className="w-24 font-semibold shrink-0 block">หัตถการ/Procedure :</span>
-              <span className="border-b border-dotted border-gray-400 flex-grow">{document.procedure}</span>
+            <div className="mb-3">
+              <span className="font-semibold whitespace-nowrap mr-1">หัตถการ/Procedure :</span>
+              <span>{document.procedure}</span>
             </div>
-            <div className="flex gap-6 absolute bottom-1.5 left-1.5">
-              <label className="flex items-center gap-1 cursor-pointer">
-                <div className={`w-3 h-3 border border-black flex items-center justify-center ${document.admitType === 'Admit' ? 'bg-black text-white' : 'bg-white'}`}>
-                  {document.admitType === 'Admit' && <Check className="w-2.5 h-2.5" strokeWidth={4} />}
-                </div>
+            <div className="flex justify-between items-center mt-auto pr-2">
+              <div className="flex items-center gap-1.5">
+                {document.admitType === 'Admit' ? <CheckSquare className="w-3.5 h-3.5 text-black" strokeWidth={2.5} /> : <Square className="w-3.5 h-3.5 text-black" strokeWidth={2.5} />}
                 <span>Admit</span>
-              </label>
-              <div className="flex gap-1">
-                <span>LOS:</span>
-                <span className="border-b border-dotted border-gray-400 w-16">{document.los}</span>
               </div>
-              <label className="flex items-center gap-1 cursor-pointer">
-                <div className={`w-3 h-3 border border-black flex items-center justify-center ${document.admitType === 'Day Case' ? 'bg-black text-white' : 'bg-white'}`}>
-                  {document.admitType === 'Day Case' && <Check className="w-2.5 h-2.5" strokeWidth={4} />}
-                </div>
+              <div className="flex gap-1 items-end">
+                <span>LOS:</span>
+                <span className="border-b border-dotted border-gray-400 w-32 inline-block h-3">{document.los}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {document.admitType === 'Day Case' ? <CheckSquare className="w-3.5 h-3.5 text-black" strokeWidth={2.5} /> : <Square className="w-3.5 h-3.5 text-black" strokeWidth={2.5} />}
                 <span>Day Case</span>
-              </label>
+              </div>
             </div>
           </div>
           <div className="col-span-3 p-1.5 flex flex-col justify-between">
@@ -202,8 +200,8 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
               <span className="font-semibold block">ชนิดของการดมยา/Anesthesia :</span>
               <span>{document.anesthesia}</span>
             </div>
-            <div>
-              <span className="font-semibold">วันที่ผ่าตัด/OR date : </span>
+            <div className="whitespace-nowrap text-[10.5px] tracking-tighter">
+              <span className="font-semibold">วันนัดผ่าตัด/OR date : </span>
               <span>{document.orDate}</span>
             </div>
           </div>
@@ -243,7 +241,6 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <span className="font-bold w-10">Note:</span>
             <span className="border-b border-dotted border-black flex-grow block h-4"></span>
           </div>
-          <div className="border-b border-dotted border-black w-full h-4"></div>
         </div>
           
         <div className="border border-black p-1.5 font-bold mb-1.5 text-[11px] bg-gray-100/50">
@@ -252,11 +249,12 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
 
           <div className="space-y-2 px-2">
             <label className="flex items-start gap-2 cursor-pointer group">
-              <div className={`mt-0.5 w-4 h-4 shrink-0 border-2 rounded-sm flex items-center justify-center transition-colors ${
-                  agree1 ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-400'
-                } ${!isPending && 'opacity-50 pointer-events-none'}`}
-              >
-                {agree1 && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
+              <div className={`mt-0.5 shrink-0 ${!isPending && 'opacity-50 pointer-events-none'}`}>
+                {agree1 ? (
+                  <CheckSquare className="w-4 h-4 text-black" strokeWidth={2} />
+                ) : (
+                  <Square className="w-4 h-4 text-gray-500 group-hover:text-black" strokeWidth={2} />
+                )}
                 <input 
                   type="checkbox" 
                   className="sr-only" 
@@ -264,15 +262,20 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                   onChange={(e) => isPending && setAgree1(e.target.checked)}
                 />
               </div>
-              <span className="text-gray-800">{document.agreementText1}</span>
+              <div className="text-gray-800 text-[11px] leading-relaxed">
+                {document.agreementText1.split('\n').map((line, i) => (
+                  <p key={i} className="mb-0.5 last:mb-0">{line}</p>
+                ))}
+              </div>
             </label>
 
             <label className="flex items-start gap-2 cursor-pointer group">
-              <div className={`mt-0.5 w-4 h-4 shrink-0 border-2 rounded-sm flex items-center justify-center transition-colors ${
-                  agree2 ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-400'
-                } ${!isPending && 'opacity-50 pointer-events-none'}`}
-              >
-                {agree2 && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
+              <div className={`mt-0.5 shrink-0 ${!isPending && 'opacity-50 pointer-events-none'}`}>
+                {agree2 ? (
+                  <CheckSquare className="w-4 h-4 text-black" strokeWidth={2} />
+                ) : (
+                  <Square className="w-4 h-4 text-gray-500 group-hover:text-black" strokeWidth={2} />
+                )}
                 <input 
                   type="checkbox" 
                   className="sr-only" 
@@ -280,7 +283,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                   onChange={(e) => isPending && setAgree2(e.target.checked)}
                 />
               </div>
-              <div className="text-gray-800">
+              <div className="text-gray-800 text-[11px] leading-relaxed">
                 {document.agreementText2.split('\n').map((line, i) => (
                   <p key={i} className="mb-1 last:mb-0">{line}</p>
                 ))}
@@ -291,7 +294,11 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         {/* Row 5: Exclusions */}
         <div className="mb-2 text-[11px] leading-relaxed">
           <div className="font-bold text-[12px] mb-1">การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</div>
-          <div className="text-gray-700">{document.exclusions}</div>
+          <div className="text-gray-700">
+            {document.exclusions.split('\n').map((line, i) => (
+              <p key={i} className="mb-0.5 last:mb-0">{line}</p>
+            ))}
+          </div>
         </div>
 
         {/* Row 6: Signatures */}
@@ -324,7 +331,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                 </div>
               )}
             </div>
-            <div className="text-center w-full text-[10px]">
+            <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (ผู้ป่วย, ญาติ / Patient or Representative)
             </div>
             {!isPending && document.signature && (
@@ -338,7 +345,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           <div className="flex flex-col items-center">
             <div className="w-full border-b border-dotted border-black h-10 mb-2">
             </div>
-            <div className="text-center w-full text-[10px]">
+            <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (เจ้าหน้าที่ประเมินค่าใช้จ่าย / Hospital Estimator)
             </div>
           </div>
@@ -347,24 +354,22 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           <div className="flex flex-col items-center">
             <div className="w-full border-b border-dotted border-black h-10 mb-2">
             </div>
-            <div className="text-center w-full text-[10px]">
+            <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (ผู้ประสานงาน / International Coordinator)
             </div>
           </div>
+        </div>
 
+        <div className="text-[9px] text-gray-600 mt-3">
+          <span className="font-bold">***หมายเหตุ เอกสารนี้มีระยะเวลา {document.validDays} วัน นับจากวันที่ทำการประเมินราคา</span>
+          <span> Remark: This document is valid {document.validDays} days after agreement to this estimate.</span>
         </div>
 
         {/* Row 7: Footer */}
-        <div className="flex justify-between items-end text-[9px] mt-4 text-gray-600">
-          <div>
-            <span className="font-bold">***หมายเหตุ เอกสารนี้มีระยะเวลา {document.validDays} วัน นับจากวันที่ทำการประเมินราคา</span>
-            <span> Remark: This document is valid {document.validDays} days after agreement to this estimate.</span>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 items-end text-[9px] mt-2 text-gray-600">
-          <div></div>
-          <div className="text-center">1/1</div>
-          <div className="text-right">{document.formCode}</div>
+        <div className="mt-auto pt-4 flex justify-between items-end text-[9px] text-gray-600">
+          <div className="w-1/3"></div>
+          <div className="w-1/3 text-center">1/1</div>
+          <div className="w-1/3 text-right">{document.formCode}</div>
         </div>
         
       </div>
