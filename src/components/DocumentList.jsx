@@ -233,9 +233,7 @@ export default function DocumentList({ documents, onSelectDocument, loading }) {
                       <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
                         HN {doc.hn}
                       </span>
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
-                        {doc.rights}
-                      </span>
+
 
                       {/* Status Badge */}
                       {isPending ? (
