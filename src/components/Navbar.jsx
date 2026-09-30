@@ -29,8 +29,8 @@ export default function Navbar({ onResetData }) {
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Brand & Hospital Info */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
-              <span className="text-xl sm:text-2xl font-black tracking-tight">BSI</span>
+            <div className="flex items-center justify-center shrink-0">
+              <img src="/siriroj-logo.svg" alt="Bangkok Hospital Siriroj" className="h-10 sm:h-12 w-auto object-contain" />
             </div>
             <div>
               <div className="flex items-center space-x-2">

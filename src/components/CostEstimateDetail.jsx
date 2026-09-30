@@ -114,7 +114,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           </div>
           
           {/* Photo Column */}
-          <div className="col-span-2 border-r border-black bg-gray-200 flex items-center justify-center overflow-hidden h-[110px]">
+          <div className="col-span-2 border-r border-black bg-gray-200 flex items-center justify-center overflow-hidden h-[95px]">
             {document.patientPhoto ? (
                <img src={document.patientPhoto} alt="Patient" className="w-full h-full object-cover" />
             ) : (
@@ -161,7 +161,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         </div>
 
         {/* Row 2: Medical Details */}
-        <div className="grid grid-cols-12 gap-0 border border-black border-t-0 mb-4 text-[11px] bg-gray-50/50">
+        <div className="grid grid-cols-12 gap-0 border border-black border-t-0 mb-2 text-[11px] bg-gray-50/50">
           <div className="col-span-3 p-1.5 border-r border-black flex flex-col justify-between">
             <div>
               <span className="font-semibold block">เลขที่อ้างอิง การตรวจสอบสิทธิ์ /</span>
@@ -210,7 +210,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         </div>
 
         {/* Row 3: Cost Breakdown Table */}
-        <table className="w-full border-collapse border border-black text-[12px] mb-4">
+        <table className="w-full border-collapse border border-black text-[12px] mb-2">
           <thead className="bg-gray-200 font-semibold">
             <tr>
               <th className="border border-black p-1.5 text-left w-20">SIM B</th>
@@ -238,7 +238,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         </table>
 
         {/* Row 4: Note & Agreements */}
-        <div className="mb-4 text-[11px] leading-tight space-y-1">
+        <div className="mb-2 text-[11px] leading-tight space-y-1">
           <div className="flex items-end">
             <span className="font-bold w-10">Note:</span>
             <span className="border-b border-dotted border-black flex-grow block h-4"></span>
@@ -246,11 +246,11 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           <div className="border-b border-dotted border-black w-full h-4"></div>
         </div>
           
-        <div className="border border-black p-1.5 font-bold mb-2 text-[11px] bg-gray-100/50">
+        <div className="border border-black p-1.5 font-bold mb-1.5 text-[11px] bg-gray-100/50">
           โปรดชำระเงินมัดจำ {document.depositPercent}% ของราคาประเมินก่อนเข้ารับบริการ / A Deposit of {document.depositPercent}% is required before surgery =
         </div>
 
-          <div className="space-y-3 px-2">
+          <div className="space-y-2 px-2">
             <label className="flex items-start gap-2 cursor-pointer group">
               <div className={`mt-0.5 w-4 h-4 shrink-0 border-2 rounded-sm flex items-center justify-center transition-colors ${
                   agree1 ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-400'
@@ -289,13 +289,13 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           </div>
 
         {/* Row 5: Exclusions */}
-        <div className="mb-4 text-[11px] leading-relaxed">
+        <div className="mb-2 text-[11px] leading-relaxed">
           <div className="font-bold text-[12px] mb-1">การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</div>
           <div className="text-gray-700">{document.exclusions}</div>
         </div>
 
         {/* Row 6: Signatures */}
-        <div className="grid grid-cols-3 gap-8 text-[11px] mt-12 mb-2 px-4">
+        <div className="grid grid-cols-3 gap-8 text-[11px] mt-6 mb-1 px-4">
           
           {/* Patient Signature Slot (iPad Interactive) */}
           <div className="flex flex-col items-center">
@@ -361,9 +361,10 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <span> Remark: This document is valid {document.validDays} days after agreement to this estimate.</span>
           </div>
         </div>
-        <div className="flex justify-between items-end text-[9px] mt-2 text-gray-600">
-          <div>1/1</div>
-          <div>{document.formCode}</div>
+        <div className="grid grid-cols-3 items-end text-[9px] mt-2 text-gray-600">
+          <div></div>
+          <div className="text-center">1/1</div>
+          <div className="text-right">{document.formCode}</div>
         </div>
         
       </div>
