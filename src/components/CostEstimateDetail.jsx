@@ -69,13 +69,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                 <CheckCircle2 className="w-4 h-4 mr-1.5 text-emerald-600" />
                 ลงนามเสร็จสมบูรณ์แล้ว
               </span>
-              <button
-                onClick={handlePrint}
-                className="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition cursor-pointer"
-              >
-                <Printer className="w-4 h-4 mr-1.5 text-slate-500" />
-                พิมพ์ / พรีวิว PDF
-              </button>
+
             </div>
           )}
         </div>
