@@ -8,7 +8,8 @@ import {
   UserCircle2,
   Check,
   Square,
-  CheckSquare
+  CheckSquare,
+  AlertCircle
 } from 'lucide-react';
 import SignatureModal from './SignatureModal';
 
@@ -19,6 +20,8 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   // Agreement Checkboxes
   const [agree1, setAgree1] = useState(false);
   const [agree2, setAgree2] = useState(false);
+  const [showErrorHighlight, setShowErrorHighlight] = useState(false);
+  const [errorToast, setErrorToast] = useState(null);
 
   React.useEffect(() => {
     if (document?.status === 'SIGNED') {
@@ -50,6 +53,14 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         <div className="print:hidden fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-2 animate-bounce">
           <CheckCircle2 className="w-5 h-5" />
           <span className="text-sm font-semibold">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {errorToast && (
+        <div className="print:hidden fixed top-6 right-6 z-50 bg-rose-600 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-2 animate-bounce">
+          <AlertCircle className="w-5 h-5" />
+          <span className="text-sm font-semibold">{errorToast}</span>
         </div>
       )}
 
@@ -234,7 +245,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           โปรดชำระเงินมัดจำ {document.depositPercent}% ของราคาประเมินก่อนเข้ารับบริการ / A Deposit of {document.depositPercent}% is required before surgery =
         </div>
 
-          <div className="space-y-2 px-2">
+          <div className={`space-y-2 px-2 py-2 rounded-lg transition-colors ${showErrorHighlight ? 'bg-rose-50/80 border border-rose-200' : ''}`}>
             <label className="flex items-start gap-2 cursor-pointer group">
               <div className={`mt-0.5 shrink-0 ${!isPending && 'opacity-50 pointer-events-none'}`}>
                 {agree1 ? (
@@ -305,7 +316,12 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                     if (canSign) {
                       setIsSignModalOpen(true);
                     } else {
-                      alert("กรุณาติ๊กช่องสี่เหลี่ยมด้านบน เพื่อยอมรับเงื่อนไขการประเมินราคาให้ครบก่อนเซ็นเอกสารครับ");
+                      setErrorToast("กรุณาติ๊กช่องสี่เหลี่ยมด้านบน เพื่อยอมรับเงื่อนไขการประเมินราคาให้ครบก่อนเซ็นเอกสารครับ");
+                      setShowErrorHighlight(true);
+                      setTimeout(() => {
+                        setErrorToast(null);
+                        setShowErrorHighlight(false);
+                      }, 3500);
                     }
                   }}
                 >
