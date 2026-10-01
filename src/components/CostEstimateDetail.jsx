@@ -301,11 +301,17 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                       ? 'border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60' 
                       : 'border-gray-300 bg-gray-50 opacity-60 cursor-not-allowed'
                   }`}
-                  onClick={() => canSign && setIsSignModalOpen(true)}
+                  onClick={() => {
+                    if (canSign) {
+                      setIsSignModalOpen(true);
+                    } else {
+                      alert("กรุณาติ๊กช่องสี่เหลี่ยมด้านบน เพื่อยอมรับเงื่อนไขการประเมินราคาให้ครบก่อนเซ็นเอกสารครับ");
+                    }
+                  }}
                 >
                   <PenTool className={`w-5 h-5 mb-1 ${canSign ? 'text-blue-500 animate-bounce' : 'text-gray-400'}`} />
-                  <span className={`font-bold text-[10px] ${canSign ? 'text-blue-700' : 'text-gray-500'}`}>
-                    {canSign ? 'แตะที่นี่เพื่อลงลายมือชื่อ' : 'ติ๊กยอมรับเงื่อนไขก่อนเซ็น'}
+                  <span className={`font-bold text-xs ${canSign ? 'text-blue-700' : 'text-gray-500'}`}>
+                    {canSign ? 'แตะที่นี่เพื่อลงลายมือชื่อ' : 'กรุณาติ๊กยอมรับเงื่อนไขก่อนเซ็น'}
                   </span>
                 </div>
               ) : (
