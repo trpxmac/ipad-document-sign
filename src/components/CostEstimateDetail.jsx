@@ -20,6 +20,13 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   const [agree1, setAgree1] = useState(false);
   const [agree2, setAgree2] = useState(false);
 
+  React.useEffect(() => {
+    if (document?.status === 'SIGNED') {
+      setAgree1(true);
+      setAgree2(true);
+    }
+  }, [document]);
+
   if (!document) return null;
 
   const isPending = document.status === 'PENDING';
