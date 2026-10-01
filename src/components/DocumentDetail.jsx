@@ -57,13 +57,11 @@ export default function DocumentDetail({ document, onBack, onSaveSignature }) {
 
         <div className="flex items-center space-x-2 sm:space-x-3">
           {isPending ? (
-            <button
-              onClick={() => setIsSignModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm shadow-lg shadow-blue-600/20 transition cursor-pointer"
-            >
-              <PenTool className="w-4 h-4 mr-2" />
-              เซ็นเอกสารบน iPad (Sign Now)
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold">
+                รอการลงนาม
+              </span>
+            </div>
           ) : (
             <div className="flex items-center space-x-2">
               <span className="inline-flex items-center px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
@@ -90,22 +88,18 @@ export default function DocumentDetail({ document, onBack, onSaveSignature }) {
               <span className="bg-blue-500/30 text-blue-200 font-mono text-xs font-bold px-2.5 py-0.5 rounded border border-blue-400/30">
                 HN: {document.hn}
               </span>
-              <span className="bg-white/10 text-white text-xs px-2.5 py-0.5 rounded">
-                สิทธิ์: {document.rights}
-              </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight pt-1">
               {document.patientName}
             </h2>
             <p className="text-xs text-slate-300">
-              เพศ: {document.patientGender} • อายุ: {document.patientAge} ปี • ห้อง/เตียง: {document.room} • บัตร ปชช/Passport: {document.idCard}
+              เพศ: {document.patientGender} • อายุ: {document.patientAge} ปี • บัตร ปชช/Passport: {document.idCard}
             </p>
           </div>
 
           <div className="bg-white/10 rounded-2xl p-3 border border-white/10 text-xs space-y-1 shrink-0">
-            <div className="text-slate-300">แพทย์ผู้ดูแล:</div>
-            <div className="font-semibold text-white">{document.attendingPhysician}</div>
-            <div className="text-slate-400 text-[11px] pt-1">รหัสเอกสาร: {document.id}</div>
+            <div className="text-slate-300">รหัสเอกสาร:</div>
+            <div className="font-semibold text-white">{document.id}</div>
           </div>
         </div>
       </div>
@@ -194,11 +188,11 @@ export default function DocumentDetail({ document, onBack, onSaveSignature }) {
                 ) : (
                   // Signed State - Display Real Signature Image
                   <div className="my-2 bg-white rounded-xl border border-emerald-300 p-3 shadow-xs">
-                    <div className="h-24 flex items-center justify-center border-b border-slate-100 pb-2">
+                    <div className="h-24 flex items-center justify-center border-b border-slate-100 pb-2 overflow-hidden">
                       <img 
                         src={document.signature?.signatureDataUrl} 
                         alt="Digital Signature" 
-                        className="max-h-full max-w-full object-contain"
+                        className="max-h-full max-w-full object-contain scale-[1.25] mix-blend-multiply"
                       />
                     </div>
                     <div className="pt-2 text-center text-xs text-slate-600">

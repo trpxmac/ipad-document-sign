@@ -28,6 +28,15 @@ export default function SignatureModal({ document, isOpen, onClose, onConfirmSig
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsSubmitting(false);
+      setErrorMessage('');
+      setPreviewUrl(null);
+    }
+  }, [isOpen]);
+
   // Initialize or resize Signature Pad
   useEffect(() => {
     if (!isOpen || !canvasRef.current) return;
@@ -131,6 +140,7 @@ export default function SignatureModal({ document, isOpen, onClose, onConfirmSig
       });
     } catch (err) {
       setErrorMessage(err.message || 'เกิดข้อผิดพลาดในการบันทึกลายเซ็น');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -280,8 +290,8 @@ export default function SignatureModal({ document, isOpen, onClose, onConfirmSig
           {previewUrl && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-24 h-12 bg-white rounded border border-emerald-300 flex items-center justify-center p-1">
-                  <img src={previewUrl} alt="Preview" className="max-h-full object-contain" />
+                <div className="w-40 h-20 bg-white rounded border border-emerald-300 flex items-center justify-center p-1 overflow-hidden">
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-contain scale-[1.2]" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-emerald-800">ตัวอย่างลายเซ็นพร้อมใช้งาน</div>

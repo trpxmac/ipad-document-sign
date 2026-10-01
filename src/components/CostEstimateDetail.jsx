@@ -59,23 +59,9 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         <div className="flex items-center space-x-2 sm:space-x-3">
           {isPending ? (
             <div className="flex items-center gap-3">
-              {!canSign && (
-                <span className="text-xs text-rose-500 font-medium hidden sm:inline-block">
-                  * กรุณาติ๊กยอมรับเงื่อนไขทั้ง 2 ข้อด้านล่างก่อนเซ็นเอกสาร
-                </span>
-              )}
-              <button
-                disabled={!canSign}
-                onClick={() => setIsSignModalOpen(true)}
-                className={`inline-flex items-center px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition cursor-pointer ${
-                  canSign 
-                    ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-blue-600/20' 
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                }`}
-              >
-                <PenTool className="w-4 h-4 mr-2" />
-                เซ็นเอกสารบน iPad (Sign Now)
-              </button>
+              <span className="inline-flex items-center px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold">
+                รอการลงนาม
+              </span>
             </div>
           ) : (
             <div className="flex items-center space-x-2">
@@ -322,11 +308,11 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                   </span>
                 </div>
               ) : (
-                <div className="absolute bottom-1 w-full flex items-center justify-center">
+                <div className="absolute bottom-0 w-full flex items-center justify-center translate-y-1">
                   <img 
                     src={document.signature?.signatureDataUrl} 
                     alt="Signature" 
-                    className="max-h-12 object-contain"
+                    className="max-h-20 w-auto object-contain scale-[1.3] mix-blend-multiply"
                   />
                 </div>
               )}

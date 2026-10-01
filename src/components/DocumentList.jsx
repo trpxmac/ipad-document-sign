@@ -101,7 +101,7 @@ export default function DocumentList({ documents, onSelectDocument, loading }) {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-600">เอกสารทั้งหมดในรอบเวร</span>
+            <span className="text-sm font-semibold text-slate-600">เอกสารทั้งหมด</span>
             <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
               <FileText className="w-5 h-5" />
             </div>
@@ -199,7 +199,7 @@ export default function DocumentList({ documents, onSelectDocument, loading }) {
       </div>
 
       {/* Document Items List - iPad Optimized Touch Cards */}
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 pb-2">
         {loading ? (
           <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-400">
             <div className="animate-spin w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
@@ -254,7 +254,7 @@ export default function DocumentList({ documents, onSelectDocument, loading }) {
                         <User className="w-4 h-4 mr-2 text-slate-400" />
                         {doc.patientName} 
                         <span className="ml-2 text-xs font-normal text-slate-500">
-                          ({doc.patientGender}, {doc.patientAge} ปี) • {doc.room}
+                          ({doc.patientGender}, {doc.patientAge} ปี)
                         </span>
                       </h3>
                       <p className="text-sm font-semibold text-slate-700 mt-1 flex items-center">
