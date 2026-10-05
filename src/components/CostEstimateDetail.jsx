@@ -27,6 +27,17 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   // Strikethrough state for exclusions
   const [struckExclusions, setStruckExclusions] = useState([]);
   
+  // Auto-format deposit amount with commas and decimals on blur
+  const handleDepositBlur = () => {
+    const numericValue = parseFloat(depositAmount.replace(/,/g, ''));
+    if (!isNaN(numericValue)) {
+      setDepositAmount(numericValue.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      }));
+    }
+  };
+  
   // Agreement Checkboxes
   const [agree1, setAgree1] = useState(false);
   const [agree2, setAgree2] = useState(false);
@@ -67,6 +78,11 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         pixelRatio: 2,
         width: node.offsetWidth,
         height: node.offsetHeight,
+        filter: (domNode) => {
+          // ซ่อนปุ่มหรือข้อความแนะนำไม่ให้ติดไปกับรูปภาพ
+          if (domNode.id === 'strikethrough-hint') return false;
+          return true;
+        },
         style: {
           margin: '0', // แก้ปัญหาภาพเบี้ยว/แหว่งจาก mx-auto
           borderRadius: '0', // เอาขอบมนออกให้เหมือนกระดาษจริง
@@ -325,6 +341,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             type="text"
             value={depositAmount}
             onChange={(e) => setDepositAmount(e.target.value)}
+            onBlur={handleDepositBlur}
             placeholder="ระบุยอดเงิน"
             className="flex-grow min-w-0 bg-transparent border-b border-dotted border-black h-4 outline-none focus:bg-yellow-50/50 px-1 font-bold"
           />
@@ -378,7 +395,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         <div className="mb-2 text-[11px] leading-relaxed">
           <div className="font-bold text-[12px] mb-1 flex items-center justify-between">
             <span>การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</span>
-            <span className="text-[9px] font-normal text-blue-600 print:hidden bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">แตะที่ข้อความเพื่อขีดฆ่า</span>
+            <span id="strikethrough-hint" className="text-[9px] font-normal text-blue-600 print:hidden bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">แตะที่ข้อความเพื่อขีดฆ่า</span>
           </div>
           <div className="text-gray-700">
             {document.exclusions.split('\n').map((line, lineIndex) => (
