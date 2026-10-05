@@ -1,7 +1,7 @@
 # ระบบเซ็นเอกสารดิจิทัลบน iPad (iPad Document e-Sign Prototype)
 ### โรงพยาบาลกรุงเทพสิริโรจน์ (Bangkok Hospital Siriroj)
 
-ระบบต้นแบบ (Prototype Web Application) สำหรับการลงลายมือชื่อดิจิทัลบนเอกสารทางการแพทย์ผ่าน iPad โดยออกแบบให้พร้อมสำหรับการเชื่อมต่อกับระบบโรงพยาบาล **iMed (HIS)** ในอนาคต
+ระบบต้นแบบ (Prototype Web Application) สำหรับการจัดการและลงลายมือชื่อดิจิทัลบนเอกสารทางการแพทย์ผ่าน iPad โดยออกแบบให้พร้อมสำหรับการเชื่อมต่อกับระบบโรงพยาบาล **iMed (HIS)** ในอนาคต
 
 ---
 
@@ -9,74 +9,65 @@
 
 1. **หน้ารายการเอกสารรอเซ็น (Document List View):**
    - แสดงรายการเอกสารที่ส่งมาจากคลินิก/หอผู้ป่วย พร้อมระบุ HN, ชื่อผู้ป่วย, ประเภทเอกสาร, วันที่, และสถานะ
-   - มีระบบ **Search** ค้นหาด้วย HN หรือชื่อคนไข้ และ **Filter** คัดกรองตามสถานะ (รอเซ็น / เซ็นแล้ว) และหมวดหมู่เอกสาร
+   - มีระบบ **Search** ค้นหาด้วย HN หรือชื่อคนไข้ และ **Filter** คัดกรองตามหมวดหมู่ (ทุกประเภท, ประเมินค่ารักษา, วาดอิสระ) และสถานะเอกสาร
    - แสดงตัวเลขสรุป (KPI Summary) เอกสารรอเซ็น / เซ็นแล้วในรอบเวร
 
-2. **หน้ารายละเอียดเอกสาร (Document Detail / PDF-like Viewer):**
-   - แสดงหัวเอกสารทางการแพทย์ของโรงพยาบาลกรุงเทพสิริโรจน์ (Bangkok Hospital Siriroj)
-   - แถบข้อมูลผู้ป่วย (Patient Banner): HN, ชื่อ, เพศ, อายุ, บัตร ปชช/Passport
-   - เนื้อหาข้อความยินยอมและข้อกำหนดทางการแพทย์ตามมาตรฐาน JCI
-   - ปรับ Flow ให้สอดคล้องกับการใช้งานจริง โดยแตะที่ **ช่องลงลายมือชื่อด้านล่างเอกสาร** เพื่อเซ็นได้ทันที
+2. **ระบบเอกสาร 2 รูปแบบ (Dual Document Modes):**
+   - **โหมดฟอร์มโครงสร้าง (Structured Form Mode):** เช่น ใบประเมินค่ารักษาพยาบาล (Cost Estimate)
+     - รองรับการกรอกยอดเงินมัดจำ, พิมพ์หมายเหตุ, และแตะเพื่อ **ขีดฆ่า (Strikethrough)** ข้อยกเว้นการรักษา
+     - มีช่องเซ็นลายเซ็นแบ่งตามบทบาท (ผู้ป่วย, เจ้าหน้าที่ประเมิน, ผู้ประสานงาน)
+   - **โหมดวาดอิสระบนภาพสแกน (Freehand Image Annotation Mode):** 
+     - รองรับการรับไฟล์รูปภาพ (เช่น เอกสารที่สแกนแล้ว) จาก iMed มาเป็นพื้นหลัง
+     - สามารถใช้ Apple Pencil ขีดเขียน, วาด, หรือเซ็นทับลงบนรูปภาพได้อย่างอิสระเต็มแผ่น
 
-3. **หน้าจอลงลายมือชื่อ (iPad Signature Screen):**
+3. **หน้าจอลงลายมือชื่อ (Signature Canvas):**
    - ปรับแต่ง Canvas ความละเอียดสูง (High-DPI Retina Display) ลายเส้นคมชัด
-   - รองรับ **Apple Pencil** (น้ำหนักและเส้นโค้งที่นุ่มนวล) และการใช้นิ้วมือ
    - ป้องกันการเลื่อน/เด้งของหน้าจอขณะจรดปากกาเซ็น (`touch-action: none`)
-   - เลือกระบุผู้ลงนามได้ระหว่าง **"ผู้ป่วยลงนามด้วยตนเอง"** หรือ **"ญาติ/ผู้แทนโดยชอบธรรม"**
-   - ปุ่มฟังก์ชันครบครัน: **ล้างลายเซ็น (Clear)**, **ดูตัวอย่าง (Preview)**, **ยกเลิก (Cancel)**, **ยืนยันการเซ็นเอกสาร (Confirm)**
+   - ปุ่มฟังก์ชัน: ล้างลายเซ็น (Clear), ยืนยันการเซ็นเอกสาร (Confirm)
 
-4. **หลังเซ็นสำเร็จ (Post-Signing State):**
-   - อัปเดตสถานะเอกสารเป็น **"เซ็นเสร็จสมบูรณ์" (SIGNED)** ทันที
-   - ประทับภาพลายเซ็นจริงลงบนเอกสาร พร้อมระบุ **วัน-เวลาที่เซ็น**, **ชื่อผู้เซ็น**, **ชื่อพยาน**, และเครื่องหมายความปลอดภัย
+4. **การส่งออกเอกสารและการประมวลผล (Export & Processing):**
+   - ระบบ Frontend จะทำการ "รวมร่าง" (Merge) ระหว่าง ฟอร์ม/รูปภาพพื้นหลัง และ รอยปากกา/ลายเซ็น
+   - สามารถกด **บันทึกเป็น JPEG (Export to JPEG)** เพื่อแปลงหน้าจอทั้งหมดให้เป็นไฟล์ภาพแผ่นเดียวที่สะอาดหมดจด (ลบเส้นประและ UI นำทางออกอัตโนมัติขณะเซฟ)
 
 ---
 
-## 🔌 คู่มือสำหรับ "พี่เล็ก" ในการเชื่อมต่อระบบ iMed จริง (Integration Guide)
+## 🔌 คู่มือสำหรับ "พี่เล็ก" ในการเชื่อมต่อระบบ iMed (Integration Guide)
 
-ระบบนี้สร้างขึ้นตามหลัก **Separation of Concerns (Clean Architecture)** โดยแยก **UI Components** ออกจาก **Data & Mock Service Layer** อย่างสิ้นเชิง หน้าจอ UI จะไม่มีการเรียก Mock Data โดยตรง แต่จะเรียกผ่าน Service Interface:
+ระบบนี้สร้างขึ้นโดยแยก **UI Components** ออกจาก **Data & Mock Service Layer** หน้าจอ UI จะไม่มีการเรียก Mock Data โดยตรง แต่จะเรียกผ่าน Service Interface:
 
-* ไฟล์ Service หลัก: [`src/services/imedService.js`](file:///D:/ipad-document-sign/src/services/imedService.js)
-* ไฟล์ Mock Data: [`src/mock/mockDocuments.js`](file:///D:/ipad-document-sign/src/mock/mockDocuments.js)
+* ไฟล์ Service หลัก: `src/services/imedService.js`
+* ไฟล์ Mock Data: `src/mock/mockDocuments.js`
 
-### ขั้นตอนการเชื่อมต่อ iMed REST API:
-1. เปิดไฟล์ `src/services/imedService.js`
-2. ปรับตัวแปร `USE_REAL_IMED_API = true` หรือกำหนดค่าใน `.env`:
-   ```env
-   VITE_IMED_API_URL=https://imed-api.siriroj.bdms.co.th/api/v1
-   ```
-3. นำโค้ด `fetch` ที่เตรียม Template ไว้ในฟังก์ชันต่างๆ มาใช้งานจริง:
-   - `fetchDocumentList(options)`: สำหรับดึงรายการเอกสารรอเซ็นจาก iMed
-   - `fetchDocumentById(documentId)`: สำหรับดึงข้อมูลเอกสารและผู้ป่วยจาก iMed
-   - `submitDocumentSignature(payload)`: สำหรับส่ง Base64 PNG ของลายเซ็น + Metadata เข้า iMed
+### รูปแบบเอกสาร (Document Categories):
+ระบบรองรับประเภทเอกสาร `documentCategory` ใน Payload ที่ดึงจาก iMed 2 แบบหลัก:
+1. `"COST_ESTIMATE"`: จะถูกนำไป Render ด้วยคอมโพเนนต์ `CostEstimateDetail.jsx` (หน้าต่างโครงสร้างฟอร์ม และมีช่องเซ็นแบบป็อปอัป)
+2. `"IMAGE_DRAWING"`: จะถูกนำไป Render ด้วยคอมโพเนนต์ `ImageDrawingDetail.jsx` (หน้าต่างวาดเขียนอิสระทับบนรูปภาพ โดยต้องส่ง `imageUrl` แนบมาด้วย)
 
-### สเปกข้อมูล Payload ที่ระบบส่งออกเมื่อมีการเซ็นเอกสาร:
+### สเปกข้อมูลที่รอรับจาก iMed (Mock Data Structure):
+ดูโครงสร้าง JSON แบบเต็มได้ที่ `src/mock/mockDocuments.js` โดยมีจุดที่น่าสนใจคือ:
 ```json
 {
-  "documentId": "DOC-2026-001",
-  "signatureDataUrl": "data:image/png;base64,iVBORw0KGgo...",
-  "signerName": "นายสมชาย ใจดี",
-  "relationship": "ผู้ป่วย",
-  "witnessName": "พว. สุภาพร สุขสมบูรณ์",
-  "signedAt": "30 ก.ย. 2569 11:15:00",
-  "isoTimestamp": "2026-09-30T04:15:00.000Z",
-  "deviceInfo": "iPad Tablet (iOS / iPadOS)",
-  "verifiedStatus": "DIGITALLY_SIGNED"
+  "id": "DOC-2026-006",
+  "hn": "67-26-025897",
+  "documentCategory": "IMAGE_DRAWING",
+  "imageUrl": "https://imed.example.com/api/files/scanned-doc-123.jpg",
+  "status": "PENDING"
 }
 ```
+
+### การตั้งค่าการเชื่อมต่อ iMed REST API จริง:
+1. เปิดไฟล์ `src/services/imedService.js`
+2. ปรับตัวแปร `USE_REAL_IMED_API = true`
+3. นำโค้ด `fetch` ที่เตรียม Template ไว้ในฟังก์ชันต่างๆ มาปรับ URL และ Header ตามที่ iMed กำหนด:
+   - `fetchDocumentList()`: ดึงรายการเอกสาร
+   - `fetchDocumentById()`: ดึงข้อมูลเอกสารโดยละเอียด
+   - `submitDocumentSignature()`: ส่งสถานะ หรือ ข้อมูลกลับไปที่ iMed (ในเวอร์ชันปัจจุบัน สำหรับโหมดวาดเขียนอิสระ การเซฟจะเป็นการ Save ลงเครื่อง iPad/Browser โดยตรง แต่สามารถปรับให้ส่ง Base64 ของภาพที่รวมร่างแล้ว กลับไปบันทึกที่ iMed ได้เช่นกันที่ฟังก์ชัน `handleSaveJpeg` ในไฟล์คอมโพเนนต์)
 
 ---
 
 ## 💻 วิธีการรันโปรเจกต์และทดสอบบน iPad
 
-### 1. รันบนเครื่องคอมพิวเตอร์:
-เปิด Terminal ในโฟลเดอร์โปรเจกต์:
-```bash
-npm run dev
-```
-
-### 2. ทดสอบบนหน้าจอ iPad จริงผ่าน Wi-Fi:
-เนื่องจากคอนฟิก Vite ได้เปิด `--host` ไว้เรียบร้อยแล้ว:
-1. เชื่อมต่อ iPad เข้ากับ Wi-Fi เดียวกันกับคอมพิวเตอร์
-2. ดู IP Address ใน Terminal ที่แสดงขึ้นมา เช่น `http://192.168.1.XX:5173`
-3. เปิดเบราว์เซอร์ **Safari บน iPad** แล้วพิมพ์ URL ดังกล่าว
-4. ทดลองใช้ Apple Pencil หรือนิ้วมือเซ็นเอกสารได้ทันที
+1. รันบนเครื่องคอมพิวเตอร์: `npm run dev`
+2. เชื่อมต่อ iPad เข้ากับ Wi-Fi เดียวกันกับคอมพิวเตอร์
+3. ดู IP Address ใน Terminal ที่แสดงขึ้นมา (เช่น `http://192.168.1.XX:5173`)
+4. เปิดเบราว์เซอร์ **Safari บน iPad** แล้วพิมพ์ URL ดังกล่าว ทดลองใช้ Apple Pencil เซ็นเอกสารได้ทันที
