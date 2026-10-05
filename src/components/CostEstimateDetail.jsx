@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   ArrowLeft, 
   PenTool, 
@@ -9,13 +9,23 @@ import {
   Check,
   Square,
   CheckSquare,
-  AlertCircle
+  AlertCircle,
+  Download
 } from 'lucide-react';
+import { toJpeg } from 'html-to-image';
+import { saveAs } from 'file-saver';
 import SignatureModal from './SignatureModal';
 
 export default function CostEstimateDetail({ document, onBack, onSaveSignature }) {
-  const [isSignModalOpen, setIsSignModalOpen] = useState(false);
+  const [signModalRole, setSignModalRole] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const documentRef = useRef(null);
+  
+  const [note, setNote] = useState(document?.note || '');
+  const [depositAmount, setDepositAmount] = useState(document?.depositAmount || '');
+  
+  // Strikethrough state for exclusions
+  const [struckExclusions, setStruckExclusions] = useState([]);
   
   // Agreement Checkboxes
   const [agree1, setAgree1] = useState(false);
@@ -36,14 +46,67 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   const canSign = agree1 && agree2;
 
   const handleConfirmSignature = async (payload) => {
-    await onSaveSignature(payload);
-    setIsSignModalOpen(false);
+    await onSaveSignature({ ...payload, role: signModalRole });
+    setSignModalRole(null);
     setToastMessage('บันทึกลายเซ็นดิจิทัลและอัปเดตสถานะสำเร็จ!');
     setTimeout(() => setToastMessage(null), 4000);
   };
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSaveJpeg = async () => {
+    if (!documentRef.current) return;
+    try {
+      const node = documentRef.current;
+      // ตั้งค่าเพื่อให้ได้ภาพ A4 แบบเต็มๆ ไม่แหว่ง และไม่มีขอบมน/เงา
+      const exportOptions = {
+        quality: 1.0,
+        backgroundColor: 'white',
+        pixelRatio: 2,
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+        style: {
+          margin: '0', // แก้ปัญหาภาพเบี้ยว/แหว่งจาก mx-auto
+          borderRadius: '0', // เอาขอบมนออกให้เหมือนกระดาษจริง
+          boxShadow: 'none', // เอาเงาออก
+          border: 'none',
+          transform: 'none'
+        }
+      };
+
+      if (window.showSaveFilePicker) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: `cost-estimate-${document.hn}.jpg`,
+          types: [{
+            description: 'JPEG Image',
+            accept: { 'image/jpeg': ['.jpg', '.jpeg'] }
+          }]
+        });
+        
+        const dataUrl = await toJpeg(node, exportOptions);
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        const dataUrl = await toJpeg(node, exportOptions);
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        saveAs(blob, `cost-estimate-${document.hn}.jpg`);
+      }
+      
+      setToastMessage('บันทึกเป็นไฟล์ JPEG สำเร็จ!');
+      setTimeout(() => setToastMessage(null), 4000);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setErrorToast('เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
+        setTimeout(() => setErrorToast(null), 4000);
+      }
+    }
   };
 
   return (
@@ -66,13 +129,22 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
 
       {/* Top Action Bar */}
       <div className="print:hidden bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          กลับไปหน้ารายการเอกสาร
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            กลับไปหน้ารายการเอกสาร
+          </button>
+          <button
+            onClick={handleSaveJpeg}
+            className="inline-flex items-center px-4 py-2.5 rounded-xl border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium text-sm transition cursor-pointer"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            บันทึกเป็น JPEG
+          </button>
+        </div>
 
         <div className="flex items-center space-x-2 sm:space-x-3">
           {isPending ? (
@@ -94,7 +166,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       </div>
 
       {/* PDF-like Formal Document Container (A4 Paper Aesthetic) */}
-      <div className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] flex flex-col p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:mx-auto print:p-[10mm] print:w-full print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:box-border">
+      <div ref={documentRef} className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] flex flex-col p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:mx-auto print:p-[10mm] print:w-full print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:box-border">
         
         {/* Row 1: Header Logos & Patient Info */}
         <div className="grid grid-cols-12 gap-2 mb-2 text-[11px] font-sans">
@@ -237,12 +309,25 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         <div className="mb-2 text-[11px] leading-tight space-y-1">
           <div className="flex items-end">
             <span className="font-bold w-10">Note:</span>
-            <span className="border-b border-dotted border-black flex-grow block h-4"></span>
+            <input 
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="พิมพ์หมายเหตุที่นี่..."
+              className="border-b border-dotted border-black flex-grow h-4 bg-transparent outline-none focus:bg-yellow-50/50 transition-colors px-1"
+            />
           </div>
         </div>
           
-        <div className="border border-black p-1.5 font-bold mb-1.5 text-[11px] bg-gray-100/50">
-          โปรดชำระเงินมัดจำ {document.depositPercent}% ของราคาประเมินก่อนเข้ารับบริการ / A Deposit of {document.depositPercent}% is required before surgery =
+        <div className="border border-black p-1.5 font-bold mb-1.5 text-[11px] bg-gray-100/50 flex items-center">
+          <span className="shrink-0 mr-2">โปรดชำระเงินมัดจำ {document.depositPercent}% ของราคาประเมินก่อนเข้ารับบริการ / A Deposit of {document.depositPercent}% is required before surgery =</span>
+          <input 
+            type="text"
+            value={depositAmount}
+            onChange={(e) => setDepositAmount(e.target.value)}
+            placeholder="ระบุยอดเงิน"
+            className="flex-grow min-w-0 bg-transparent border-b border-dotted border-black h-4 outline-none focus:bg-yellow-50/50 px-1 font-bold"
+          />
         </div>
 
           <div className={`space-y-2 px-2 py-2 rounded-lg transition-colors ${showErrorHighlight ? 'bg-rose-50/80 border border-rose-200' : ''}`}>
@@ -291,10 +376,40 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
 
         {/* Row 5: Exclusions */}
         <div className="mb-2 text-[11px] leading-relaxed">
-          <div className="font-bold text-[12px] mb-1">การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</div>
+          <div className="font-bold text-[12px] mb-1 flex items-center justify-between">
+            <span>การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</span>
+            <span className="text-[9px] font-normal text-blue-600 print:hidden bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">แตะที่ข้อความเพื่อขีดฆ่า</span>
+          </div>
           <div className="text-gray-700">
-            {document.exclusions.split('\n').map((line, i) => (
-              <p key={i} className="mb-0.5 last:mb-0">{line}</p>
+            {document.exclusions.split('\n').map((line, lineIndex) => (
+              <p key={lineIndex} className="mb-0.5 last:mb-0">
+                {line.split(',').map((part, partIndex) => {
+                  const globalIndex = `${lineIndex}-${partIndex}`;
+                  const isStruck = struckExclusions.includes(globalIndex);
+                  return (
+                    <React.Fragment key={partIndex}>
+                      <span 
+                        onClick={() => {
+                          setStruckExclusions(prev => 
+                            prev.includes(globalIndex) 
+                              ? prev.filter(i => i !== globalIndex) 
+                              : [...prev, globalIndex]
+                          );
+                        }}
+                        className={`cursor-pointer transition-colors duration-200 ${
+                          isStruck 
+                            ? 'line-through text-gray-400 decoration-red-500/70 decoration-2' 
+                            : 'hover:bg-yellow-100'
+                        }`}
+                        title="แตะเพื่อขีดฆ่า/ยกเลิกขีดฆ่า"
+                      >
+                        {part}
+                      </span>
+                      {partIndex < line.split(',').length - 1 && <span>,</span>}
+                    </React.Fragment>
+                  );
+                })}
+              </p>
             ))}
           </div>
         </div>
@@ -305,7 +420,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           {/* Patient Signature Slot (iPad Interactive) */}
           <div className="flex flex-col items-center">
             <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
-              {isPending ? (
+              {!document.signatures?.PATIENT && (!document.signature || document.signatures?.PATIENT) ? (
                 <div 
                   className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${
                     canSign 
@@ -314,7 +429,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
                   }`}
                   onClick={() => {
                     if (canSign) {
-                      setIsSignModalOpen(true);
+                      setSignModalRole('PATIENT');
                     } else {
                       setErrorToast("กรุณาติ๊กช่องสี่เหลี่ยมด้านบน เพื่อยอมรับเงื่อนไขการประเมินราคาให้ครบก่อนเซ็นเอกสารครับ");
                       setShowErrorHighlight(true);
@@ -333,7 +448,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
               ) : (
                 <div className="absolute bottom-0 w-full flex items-center justify-center translate-y-1">
                   <img 
-                    src={document.signature?.signatureDataUrl} 
+                    src={document.signatures?.PATIENT?.signatureDataUrl || document.signature?.signatureDataUrl} 
                     alt="Signature" 
                     className="max-h-20 w-auto object-contain scale-[1.3] mix-blend-multiply"
                   />
@@ -343,29 +458,73 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (ผู้ป่วย, ญาติ / Patient or Representative)
             </div>
-            {!isPending && document.signature && (
+            {(document.signatures?.PATIENT || document.signature) && (
                <div className="text-[9px] text-gray-500 mt-1">
-                 {document.signature.signedAt}
+                 {document.signatures?.PATIENT?.signedAt || document.signature?.signedAt}
                </div>
             )}
           </div>
 
           {/* Hospital Estimator Slot */}
           <div className="flex flex-col items-center">
-            <div className="w-full border-b border-dotted border-black h-10 mb-2">
+            <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
+              {!document.signatures?.ESTIMATOR ? (
+                <div 
+                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
+                  onClick={() => setSignModalRole('ESTIMATOR')}
+                >
+                  <PenTool className={`w-5 h-5 mb-1 text-blue-500`} />
+                  <span className={`font-bold text-xs text-blue-700`}>แตะเพื่อลงลายมือชื่อ</span>
+                </div>
+              ) : (
+                <div className="absolute bottom-0 w-full flex items-center justify-center translate-y-1">
+                  <img 
+                    src={document.signatures?.ESTIMATOR?.signatureDataUrl} 
+                    alt="Signature" 
+                    className="max-h-20 w-auto object-contain scale-[1.3] mix-blend-multiply"
+                  />
+                </div>
+              )}
             </div>
             <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (เจ้าหน้าที่ประเมินค่าใช้จ่าย / Hospital Estimator)
             </div>
+            {document.signatures?.ESTIMATOR && (
+               <div className="text-[9px] text-gray-500 mt-1">
+                 {document.signatures.ESTIMATOR.signedAt}
+               </div>
+            )}
           </div>
 
           {/* International Coordinator Slot */}
           <div className="flex flex-col items-center">
-            <div className="w-full border-b border-dotted border-black h-10 mb-2">
+            <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
+              {!document.signatures?.COORDINATOR ? (
+                <div 
+                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
+                  onClick={() => setSignModalRole('COORDINATOR')}
+                >
+                  <PenTool className={`w-5 h-5 mb-1 text-blue-500`} />
+                  <span className={`font-bold text-xs text-blue-700`}>แตะเพื่อลงลายมือชื่อ</span>
+                </div>
+              ) : (
+                <div className="absolute bottom-0 w-full flex items-center justify-center translate-y-1">
+                  <img 
+                    src={document.signatures?.COORDINATOR?.signatureDataUrl} 
+                    alt="Signature" 
+                    className="max-h-20 w-auto object-contain scale-[1.3] mix-blend-multiply"
+                  />
+                </div>
+              )}
             </div>
             <div className="text-center w-full text-[9px] whitespace-nowrap tracking-tighter">
               (ผู้ประสานงาน / International Coordinator)
             </div>
+            {document.signatures?.COORDINATOR && (
+               <div className="text-[9px] text-gray-500 mt-1">
+                 {document.signatures.COORDINATOR.signedAt}
+               </div>
+            )}
           </div>
         </div>
 
@@ -386,8 +545,9 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       {/* Signature Modal */}
       <SignatureModal
         document={document}
-        isOpen={isSignModalOpen}
-        onClose={() => setIsSignModalOpen(false)}
+        isOpen={!!signModalRole}
+        role={signModalRole}
+        onClose={() => setSignModalRole(null)}
         onConfirmSignature={handleConfirmSignature}
       />
     </div>

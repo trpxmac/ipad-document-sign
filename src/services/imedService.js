@@ -158,10 +158,19 @@ export async function submitDocumentSignature(payload) {
     throw new Error(`ไม่พบเอกสารรหัส ${payload.documentId}`);
   }
 
+  const prevSignatures = list[targetIndex].signatures || {};
+  if (list[targetIndex].signature && !prevSignatures.PATIENT) {
+    prevSignatures.PATIENT = list[targetIndex].signature;
+  }
+
   const updatedDoc = {
     ...list[targetIndex],
     status: 'SIGNED',
-    signature: signatureRecord,
+    signature: payload.role === 'PATIENT' ? signatureRecord : list[targetIndex].signature,
+    signatures: {
+      ...prevSignatures,
+      [payload.role || 'PATIENT']: signatureRecord
+    },
     updatedDate: thaiFormattedDate
   };
 
