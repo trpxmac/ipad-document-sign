@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import DocumentList from './components/DocumentList';
 import DocumentDetail from './components/DocumentDetail';
 import CostEstimateDetail from './components/CostEstimateDetail';
+import ImageDrawingDetail from './components/ImageDrawingDetail';
 import { 
   fetchDocumentList, 
   fetchDocumentById, 
@@ -69,14 +70,14 @@ export default function App() {
 
   // Reset Mock Data handler
   const handleResetData = () => {
-    if (confirm('คุณต้องการรีเซ็ตเอกสารทั้งหมดกลับสู่สถานะเริ่มต้นสำหรับการทดสอบหรือไม่?')) {
-      const freshDocs = resetMockData();
-      setDocuments(freshDocs);
-      if (selectedDocId) {
-        const found = freshDocs.find((d) => d.id === selectedDocId);
-        setSelectedDoc(found || null);
-      }
+    // นำ confirm ออกเพื่อป้องกันปัญหาเบราว์เซอร์บล็อก Popup (Prevent this page from creating additional dialogs)
+    const freshDocs = resetMockData();
+    setDocuments(freshDocs);
+    if (selectedDocId) {
+      const found = freshDocs.find((d) => d.id === selectedDocId);
+      setSelectedDoc(found || null);
     }
+    // เพิ่มการแจ้งเตือนสั้นๆ เพื่อให้รู้ว่ารีเซ็ตแล้ว (ถ้าจำเป็น) หรือปล่อยให้ UI รีเฟรชไปเลย
   };
 
   return (
@@ -110,6 +111,12 @@ export default function App() {
         {selectedDocId && selectedDoc ? (
           selectedDoc.documentCategory === 'COST_ESTIMATE' ? (
             <CostEstimateDetail
+              document={selectedDoc}
+              onBack={handleBackToList}
+              onSaveSignature={handleSaveSignature}
+            />
+          ) : selectedDoc.documentCategory === 'IMAGE_DRAWING' ? (
+            <ImageDrawingDetail
               document={selectedDoc}
               onBack={handleBackToList}
               onSaveSignature={handleSaveSignature}

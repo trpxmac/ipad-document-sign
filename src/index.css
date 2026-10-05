@@ -51,3 +51,11 @@ html, body {
     print-color-adjust: exact !important;
   }
 }
+
+/* Hide interactive UI during JPEG export */
+.export-mode ::placeholder {
+  color: transparent !important;
+}
+.export-mode .export-hide {
+  display: none !important;
+}

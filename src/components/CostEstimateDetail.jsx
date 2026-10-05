@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, 
   PenTool, 
@@ -10,7 +10,9 @@ import {
   Square,
   CheckSquare,
   AlertCircle,
-  Download
+  Download,
+  Edit3,
+  Eraser
 } from 'lucide-react';
 import { toJpeg } from 'html-to-image';
 import { saveAs } from 'file-saver';
@@ -27,6 +29,12 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
   // Strikethrough state for exclusions
   const [struckExclusions, setStruckExclusions] = useState([]);
   
+  // Freehand Draw Mode State
+  const [isDrawMode, setIsDrawMode] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef(null);
+  const ctxRef = useRef(null);
+  
   // Auto-format deposit amount with commas and decimals on blur
   const handleDepositBlur = () => {
     const numericValue = parseFloat(depositAmount.replace(/,/g, ''));
@@ -37,7 +45,81 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       }));
     }
   };
-  
+
+  // --- Canvas Drawing Logic ---
+  const initCanvas = () => {
+    if (canvasRef.current && documentRef.current) {
+      const canvas = canvasRef.current;
+      const rect = documentRef.current.getBoundingClientRect();
+      
+      // We only set width/height if it hasn't been set yet to avoid clearing existing drawings on re-renders
+      if (canvas.width !== rect.width || canvas.height !== rect.height) {
+        // Save existing image data before resizing if needed, but for simplicity we assume 
+        // size doesn't change after load for this fixed A4 form.
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#2563eb'; // Blue pen
+      ctxRef.current = ctx;
+    }
+  };
+
+  useEffect(() => {
+    if (isDrawMode) {
+      // Small timeout to ensure DOM is fully rendered/expanded
+      setTimeout(initCanvas, 100);
+    }
+  }, [isDrawMode]);
+
+  const getCoordinates = (e) => {
+    if (!canvasRef.current) return { offsetX: 0, offsetY: 0 };
+    const rect = canvasRef.current.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) {
+      return {
+        offsetX: e.touches[0].clientX - rect.left,
+        offsetY: e.touches[0].clientY - rect.top
+      };
+    }
+    return {
+      offsetX: e.nativeEvent.offsetX,
+      offsetY: e.nativeEvent.offsetY
+    };
+  };
+
+  const startDrawing = (e) => {
+    if (!ctxRef.current) return;
+    const { offsetX, offsetY } = getCoordinates(e);
+    ctxRef.current.beginPath();
+    ctxRef.current.moveTo(offsetX, offsetY);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing || !ctxRef.current) return;
+    e.preventDefault(); // Prevent scrolling on touch devices while drawing
+    const { offsetX, offsetY } = getCoordinates(e);
+    ctxRef.current.lineTo(offsetX, offsetY);
+    ctxRef.current.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (!ctxRef.current) return;
+    ctxRef.current.closePath();
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    if (canvasRef.current && ctxRef.current) {
+      ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+  };
+  // ----------------------------
+
   // Agreement Checkboxes
   const [agree1, setAgree1] = useState(false);
   const [agree2, setAgree2] = useState(false);
@@ -71,6 +153,19 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
     if (!documentRef.current) return;
     try {
       const node = documentRef.current;
+      node.classList.add('export-mode'); // เปิดโหมด Export เพื่อซ่อน UI กวนใจต่างๆ
+
+      // ลบ placeholder ออกชั่วคราวก่อนถ่ายรูป (แก้ปัญหา html-to-image ดึง placeholder ไปด้วย)
+      const inputs = node.querySelectorAll('input');
+      const originalPlaceholders = [];
+      inputs.forEach(input => {
+        originalPlaceholders.push(input.placeholder);
+        input.placeholder = ''; // ล้างข้อความ
+      });
+
+      // จัดเก็บ original placeholders ไว้ใช้ตอนคืนค่า
+      documentRef.current._originalPlaceholders = originalPlaceholders;
+
       // ตั้งค่าเพื่อให้ได้ภาพ A4 แบบเต็มๆ ไม่แหว่ง และไม่มีขอบมน/เงา
       const exportOptions = {
         quality: 1.0,
@@ -91,6 +186,9 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           transform: 'none'
         }
       };
+
+      // ใช้ timeout สั้นๆ เพื่อให้เบราว์เซอร์ปรับ UI (ซ่อน placeholder ฯลฯ) ให้เสร็จก่อนเรนเดอร์ภาพ
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       if (window.showSaveFilePicker) {
         const handle = await window.showSaveFilePicker({
@@ -121,6 +219,20 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       if (err.name !== 'AbortError') {
         setErrorToast('เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
         setTimeout(() => setErrorToast(null), 4000);
+      }
+    } finally {
+      if (documentRef.current) {
+        documentRef.current.classList.remove('export-mode');
+        
+        // คืนค่า placeholder กลับมา
+        const inputs = documentRef.current.querySelectorAll('input');
+        const originalPlaceholders = documentRef.current._originalPlaceholders || [];
+        inputs.forEach((input, index) => {
+          if (originalPlaceholders[index] !== undefined) {
+            input.placeholder = originalPlaceholders[index];
+          }
+        });
+        delete documentRef.current._originalPlaceholders;
       }
     }
   };
@@ -153,6 +265,29 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <ArrowLeft className="w-4 h-4 mr-2" />
             กลับไปหน้ารายการเอกสาร
           </button>
+          
+          {/* Draw Mode Controls */}
+          {isDrawMode && (
+            <button
+              onClick={clearCanvas}
+              className="inline-flex items-center px-4 py-2.5 rounded-xl border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-medium text-sm transition cursor-pointer"
+            >
+              <Eraser className="w-4 h-4 mr-2" />
+              ล้างภาพวาด
+            </button>
+          )}
+          <button
+            onClick={() => setIsDrawMode(!isDrawMode)}
+            className={`inline-flex items-center px-4 py-2.5 rounded-xl border font-medium text-sm transition cursor-pointer ${
+              isDrawMode 
+                ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700' 
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Edit3 className="w-4 h-4 mr-2" />
+            {isDrawMode ? 'ปิดโหมดปากกา' : 'เปิดโหมดปากกา'}
+          </button>
+
           <button
             onClick={handleSaveJpeg}
             className="inline-flex items-center px-4 py-2.5 rounded-xl border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium text-sm transition cursor-pointer"
@@ -182,9 +317,27 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
       </div>
 
       {/* PDF-like Formal Document Container (A4 Paper Aesthetic) */}
-      <div ref={documentRef} className="bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] flex flex-col p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:mx-auto print:p-[10mm] print:w-full print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:box-border">
+      <div 
+        ref={documentRef} 
+        className={`bg-white rounded-xl shadow-md border border-slate-300 mx-auto w-full max-w-[210mm] min-h-[297mm] flex flex-col p-[10mm] sm:p-[15mm] print:shadow-none print:border-none print:mx-auto print:p-[10mm] print:w-full print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:box-border relative ${isDrawMode ? 'cursor-crosshair' : ''}`}
+      >
         
-        {/* Row 1: Header Logos & Patient Info */}
+        {/* Draw Overlay Canvas */}
+        <canvas
+          ref={canvasRef}
+          onMouseDown={isDrawMode ? startDrawing : undefined}
+          onMouseMove={isDrawMode ? draw : undefined}
+          onMouseUp={isDrawMode ? stopDrawing : undefined}
+          onMouseLeave={isDrawMode ? stopDrawing : undefined}
+          onTouchStart={isDrawMode ? startDrawing : undefined}
+          onTouchMove={isDrawMode ? draw : undefined}
+          onTouchEnd={isDrawMode ? stopDrawing : undefined}
+          className={`absolute top-0 left-0 w-full h-full z-10 rounded-xl print:rounded-none ${isDrawMode ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        />
+        
+        {/* Content Wrapper */}
+        <div className="relative z-0">
+          {/* Row 1: Header Logos & Patient Info */}
         <div className="grid grid-cols-12 gap-2 mb-2 text-[11px] font-sans">
           {/* Logo Column */}
           <div className="col-span-3 flex flex-col justify-between">
@@ -395,7 +548,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
         <div className="mb-2 text-[11px] leading-relaxed">
           <div className="font-bold text-[12px] mb-1 flex items-center justify-between">
             <span>การประเมินราคานี้ไม่คุ้มครอง (This Estimate not Include)</span>
-            <span id="strikethrough-hint" className="text-[9px] font-normal text-blue-600 print:hidden bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">แตะที่ข้อความเพื่อขีดฆ่า</span>
+            <span id="strikethrough-hint" className="export-hide text-[9px] font-normal text-blue-600 print:hidden bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">แตะที่ข้อความเพื่อขีดฆ่า</span>
           </div>
           <div className="text-gray-700">
             {document.exclusions.split('\n').map((line, lineIndex) => (
@@ -439,7 +592,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
               {!document.signatures?.PATIENT && (!document.signature || document.signatures?.PATIENT) ? (
                 <div 
-                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${
+                  className={`export-hide print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${
                     canSign 
                       ? 'border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60' 
                       : 'border-gray-300 bg-gray-50 opacity-60 cursor-not-allowed'
@@ -487,7 +640,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
               {!document.signatures?.ESTIMATOR ? (
                 <div 
-                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
+                  className={`export-hide print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
                   onClick={() => setSignModalRole('ESTIMATOR')}
                 >
                   <PenTool className={`w-5 h-5 mb-1 text-blue-500`} />
@@ -518,7 +671,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
             <div className="w-full border-b border-dotted border-black h-10 mb-2 flex items-end justify-center pb-1 relative">
               {!document.signatures?.COORDINATOR ? (
                 <div 
-                  className={`print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
+                  className={`export-hide print:hidden absolute inset-0 -top-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all border-blue-400 bg-blue-50/50 cursor-pointer hover:bg-blue-100/60`}
                   onClick={() => setSignModalRole('COORDINATOR')}
                 >
                   <PenTool className={`w-5 h-5 mb-1 text-blue-500`} />
@@ -557,6 +710,7 @@ export default function CostEstimateDetail({ document, onBack, onSaveSignature }
           <div className="w-1/3 text-right">{document.formCode}</div>
         </div>
         
+        </div> {/* End Content Wrapper */}
       </div>
 
       {/* Signature Modal */}

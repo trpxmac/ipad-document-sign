@@ -22,12 +22,12 @@ function getStoredDocuments() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_MOCK_DOCUMENTS));
-      return INITIAL_MOCK_DOCUMENTS;
+      return JSON.parse(JSON.stringify(INITIAL_MOCK_DOCUMENTS));
     }
     return JSON.parse(raw);
   } catch (e) {
     console.error('Error reading stored documents:', e);
-    return INITIAL_MOCK_DOCUMENTS;
+    return JSON.parse(JSON.stringify(INITIAL_MOCK_DOCUMENTS));
   }
 }
 
@@ -188,6 +188,8 @@ export async function submitDocumentSignature(payload) {
  * รีเซ็ตข้อมูลกลับสู่ค่าเริ่มต้น Mock (สำหรับทดสอบ Flow)
  */
 export function resetMockData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_MOCK_DOCUMENTS));
-  return INITIAL_MOCK_DOCUMENTS;
+  // Use a deep clone of the initial mock documents so we don't accidentally mutate it later
+  const freshDocs = JSON.parse(JSON.stringify(INITIAL_MOCK_DOCUMENTS));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(freshDocs));
+  return freshDocs;
 }

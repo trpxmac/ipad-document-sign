@@ -59,5 +59,20 @@ export const INITIAL_MOCK_DOCUMENTS = [
     coordinatorSignature: null,
     
     validDays: 30
+  },
+  {
+    id: "DOC-2026-006",
+    hn: "67-26-025897",
+    vn: "067-26-169871",
+    patientName: "MR. JOE MOZES WATSON BROOKS",
+    patientGender: "Male",
+    patientAgeDetail: "34 Y 10 M 8 D",
+    
+    documentType: "เอกสารสแกน (Scanned Document) - วาดอิสระ",
+    documentCategory: "IMAGE_DRAWING",
+    createdDate: "2026-09-30 11:45",
+    status: "PENDING",
+    urgency: "NORMAL",
+    imageUrl: "/sample-scanned-doc.jpg?v=2"
   }
 ];

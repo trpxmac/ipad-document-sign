@@ -176,10 +176,11 @@ export default function DocumentList({ documents, onSelectDocument, loading }) {
         {/* Categories Dropdown / Pills */}
         <div className="flex items-center space-x-2 text-xs text-slate-500 pt-1 border-t border-slate-100 overflow-x-auto">
           <span className="font-semibold text-slate-400 shrink-0">หมวดเอกสาร:</span>
-          {['ALL', 'COST_ESTIMATE'].map((cat) => {
+          {['ALL', 'COST_ESTIMATE', 'IMAGE_DRAWING'].map((cat) => {
             const labels = {
               ALL: 'ทุกประเภท',
-              COST_ESTIMATE: 'ประเมินค่ารักษาพยาบาล'
+              COST_ESTIMATE: 'ประเมินค่ารักษาพยาบาล',
+              IMAGE_DRAWING: 'เอกสารวาดอิสระ'
             };
             return (
               <button
